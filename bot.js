@@ -74,14 +74,15 @@ function _look(done) {
     }
     posts.reverse().forEach(function (p) {
       config.irc.channels.forEach(function (c) {
-	var title = convertTags(p.title);
-        client.say(c, util.format(
-          'promptbot, add prompt %s @(u/%s) @(http://redd.it/%s) @(r/%s)',
-            title,
-            p.author,
-            p.id,
-            p.subreddit
-        ));
+	if (title = convertTags(p.title) ) {
+		client.say(c, util.format(
+		  'promptbot, add prompt %s @(u/%s) @(http://redd.it/%s) @(r/%s)',
+		    title,
+		    p.author,
+		    p.id,
+		    p.subreddit
+		));
+        }
       });
     });
 
@@ -92,7 +93,14 @@ function _look(done) {
 function convertTags(title) {
    var posttags = /\[([^\]]*)\]/g;
    while ( tag = posttags.exec(title) ) {
-       if ( tag[1] != "OT" && tag[1] != "WP" )
+       //ignore [OT] and [MODPOST] posts
+       if ( tag[1] == "OT" || tag[1] == "MODPOST")
+           return null;
+       //ignore [WP] tag, but keep post
+       else if ( tag[1] == "WP")
+           continue;
+       //convert other [tag]s to #tags
+       else
            title = title + " #" + tag[1];
    }
    title = title.replace(/\[([^\]]*)\]/g, "").trim();
