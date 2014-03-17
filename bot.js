@@ -74,17 +74,13 @@ function _look(done) {
     }
     posts.reverse().forEach(function (p) {
       config.irc.channels.forEach(function (c) {
+	var title = convertTags(p.title);
         client.say(c, util.format(
-          '%s%s %s %s %s %s',
-          irc.colors.wrap('orange', '⬆'),
-          irc.colors.wrap('cyan', '⬇'),
-          irc.colors.wrap('light_gray', String(p.score)),
-          irc.colors.wrap('light_blue', p.title),
-          irc.colors.wrap('light_gray', util.format('submitted by %s to %s',
+          'promptbot, add prompt %s @(u/%s) @(http://redd.it/%s) @(r/%s)',
+            title,
             p.author,
+            p.id,
             p.subreddit
-          )),
-          p.url
         ));
       });
     });
@@ -92,6 +88,17 @@ function _look(done) {
     done(null);
   });
 };
+
+function convertTags(title) {
+   var posttags = /\[([^\]]*)\]/g;
+   while ( tag = posttags.exec(title) ) {
+       if ( tag[1] != "OT" && tag[1] != "WP" )
+           title = title + " #" + tag[1];
+   }
+   title = title.replace(/\[([^\]]*)\]/g, "").trim();
+   return title;
+}
+
 
 var digits = 'abcdefghijklmnopqrstuvwxyz0123456789'.split(''),
     base = digits.length;
